@@ -6,7 +6,6 @@
 
 * Ensure this code is not compressed or zipped (unzip if required)
 * Open chrome.
-* Double check you have no other extensions loaded that may affect the RSI website.
 * Type the following into the address bar: chrome://extensions
 * Switch on developer mode (toggle on the right top called developer mode)
 * Click the button Load unpacked
@@ -26,7 +25,6 @@
 * Connects all Ships and Ship Names found within each pledge.
 * Includes handles.
 * Use at your own risk - no warranty or support is provided for this extension.
-* You can remove this extension any time by opening up a new chrome tab to chrome://extensions and clicking remove
 
 **Always enable Two Factor Authentication on your RSI account before using ANY chrome extension. Note, Email based 2fa is not as secure as Google Authenticator or Authy based 2fa**
 

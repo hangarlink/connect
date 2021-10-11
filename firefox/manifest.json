@@ -4,28 +4,22 @@
   "version": "1.0",
   "short_name": "Hangar Link Connect",
   "description": "Hangar Link Connect",
-  "permissions": [
-    "https://robertsspaceindustries.com/*",
-    "cookies"
-  ],
-  "content_scripts": [],
-  "web_accessible_resources": [
-  ],
+  "homepage_url": "https://hangar.link",
   "icons": { 
     "16": "images/icon16.png",
     "48": "images/icon48.png",
     "128": "images/icon128.png"
   },
-  "background": {
-    "scripts": [
-      "scripts/background.js"
-    ]
-  },
-  "externally_connectable": {
-    "matches": [
-      "https://hangar.link/*"
-    ]
-  },
+  "content_scripts": [
+    {
+      "matches": ["https://hangar.link/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "permissions": [
+    "https://robertsspaceindustries.com/*",
+    "cookies"
+  ],
   "browser_action": {
     "default_title": "Hangar Link",
     "default_icon": {
@@ -34,5 +28,9 @@
       "128": "images/icon128.png"
     }
   },
-  "content_security_policy": "script-src 'self'; object-src 'self'"
+  "background": {
+    "scripts": [
+        "background.js"
+    ]
+  }  
 }
