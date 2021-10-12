@@ -1,0 +1,7 @@
+v1.0
+====
+2021/10/07 Initial Release.
+
+v1.1
+====
+2021/10/12 Aligned code with Chrome Extension.

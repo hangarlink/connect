@@ -2,7 +2,7 @@ function handleResponse(response) {
   window.postMessage({
     direction: "from-hangar-link-connect",
     message: response,
-  }, "http://localhost:56805");
+  }, "https://hangar.link");
 }
 
 window.addEventListener("message", (event) => {
