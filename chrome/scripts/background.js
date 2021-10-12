@@ -1,10 +1,10 @@
-(chrome.action || chrome.browserAction).onClicked.addListener(function () {
-  chrome.tabs.create({ url: "https://hangar.link" });
+((chrome || browser).action || (chrome || browser).browserAction).onClicked.addListener(function () {
+  (chrome || browser).tabs.create({ url: "https://hangar.link" });
 });
 
 function getRsiToken() {
   return new Promise((resolve, reject) => {
-    chrome.cookies.get({url:"https://robertsspaceindustries.com/",name:"Rsi-Token"},
+    (chrome || browser).cookies.get({url:"https://robertsspaceindustries.com/",name:"Rsi-Token"},
       function (cookie) {
         if (cookie) {
           resolve(cookie.value)
@@ -136,111 +136,113 @@ async function getPrices(fromShipId, toSkuId, token) {
   return response;
 };
 
-chrome.runtime.onMessageExternal.addListener(
-  async function(rawMessage, sender, sendResponse) {
+async function onMessage(rawMessage, sendResponse) {
+  var message = JSON.parse(rawMessage || "{}");
 
-    var message = JSON.parse(rawMessage || "{}");
+  if (message?.action == "connect") {
+      sendResponse(JSON.stringify({code: 200, version: 1}));
 
-    if (message?.action == "connect") {
-        sendResponse(JSON.stringify({code: 200, version: 1}));
-
-    } else if (message?.action == "identify") {
-      var token = await getRsiToken();
-      if (!token) {
-        sendResponse(JSON.stringify({code: 400, error: "Token not found" + message?.action}));
-      } else {
-        var response = await identify(token);
-        var payload;
-        if (response.code == 200) {
-          payload = {handle: JSON.parse(response.body)?.data?.member?.displayname}
-        } else {
-          payload = {error: response.body};
-        }
-
-        sendResponse(JSON.stringify({code: response.code, payload: payload}));
-      }
-
-    } else if (message?.action == "getPledgesPage") {
-      var page = message?.page;
-      if (!!isNaN(page)) {
-        sendResponse(JSON.stringify({code: 400, error: "Invalid page " + message?.action}));
-      } else {
-        var response = await getPledgesPage(page);
-        sendResponse(JSON.stringify({code: response.code, payload: response.body}));
-      }
-
-    } else if (message?.action == "getBuybacksPage") {
-      var page = message?.page;
-      if (!!isNaN(page)) {
-        sendResponse(JSON.stringify({code: 400, error: "Invalid page " + message?.action}));
-      } else {
-        var response = await getBuybacksPage(page);
-        sendResponse(JSON.stringify({code: response.code, payload: response.body}));
-      }
-
-    } else if (message?.action == "getBuybackPage") {
-      var pledgeId = message?.pledgeId;
-      if (!!isNaN(pledgeId)) {
-        sendResponse(JSON.stringify({code: 400, error: "Invalid pledgeId " + message?.action}));
-      } else {
-        var response = await getBuybackPage(pledgeId);
-        sendResponse(JSON.stringify({code: response.code, payload: response.body}));
-      }
-
-    } else if (message?.action == "setAuthToken") {
-      var token = await getRsiToken();
-      if (!token) {
-        sendResponse(JSON.stringify({code: 400, error: "Token not found " + message?.action}));
-      } else {
-        var response = await setAuthToken(token);
-        sendResponse(JSON.stringify({code: response.code, payload: response.body}));
-      }
-
-    } else if (message?.action == "setContextTokenBuyback") {
-      var token = await getRsiToken();
-      if (!token) {
-        sendResponse(JSON.stringify({code: 400, error: "Token not found" + message?.action}));
-      } else {
-        var fromShipId = message?.fromShipId;
-        var toShipId = message?.toShipId;
-        var toSkuId = message?.toSkuId;
-        var pledgeId = message?.pledgeId;
-        if (!!isNaN(fromShipId) || !!isNaN(toShipId) || !!isNaN(toSkuId) || !!isNaN(pledgeId)) {
-          sendResponse(JSON.stringify({code: 400, error: "Token not found" + message?.action}));
-        } else {
-          var response = await setContextTokenBuyback(fromShipId, toShipId, toSkuId, pledgeId, token);
-          sendResponse(JSON.stringify({code: response.code, payload: response.body}));
-        }
-      }
-
-    } else if (message?.action == "setContext") {
-      var token = await getRsiToken();
-      if (!token) {
-        sendResponse(JSON.stringify({code: 400, error: "Token not found" + message?.action}));
-      } else {
-        var response = await setContextToken(token);
-        sendResponse(JSON.stringify({code: response.code, payload: response.body}));
-        
-      }
-
-    } else if (message?.action == "getUpgradePrice") {
-      var token = await getRsiToken();
-      if (!token) {
-        sendResponse(JSON.stringify({code: 400, error: "Token not found " + message?.action}));
-      } else {
-        var fromShipId = message?.fromShipId;
-        var toSkuId = message?.toSkuId; 
-        if (!!isNaN(fromShipId) || !!isNaN(toSkuId)) {
-          sendResponse(JSON.stringify({code: 400, error: "Parameter error " + message?.action}));
-        } else {
-          var response = await getPrices(fromShipId, toSkuId, token);
-          sendResponse(JSON.stringify({code: response.code, payload: response.body}));
-        }
-      }
-
+  } else if (message?.action == "identify") {
+    var token = await getRsiToken();
+    if (!token) {
+      sendResponse(JSON.stringify({code: 400, error: "Token not found" + message?.action}));
     } else {
-      sendResponse(JSON.stringify({code: 500, error: "Unknown Action " + message?.action}));
-    }
-  }
-);
+      var response = await identify(token);
+      var payload;
+      if (response.code == 200) {
+        payload = {handle: JSON.parse(response.body)?.data?.member?.displayname}
+      } else {
+        payload = {error: response.body};
+      }
 
+      sendResponse(JSON.stringify({code: response.code, payload: payload}));
+    }
+
+  } else if (message?.action == "getPledgesPage") {
+    var page = message?.page;
+    if (!!isNaN(page)) {
+      sendResponse(JSON.stringify({code: 400, error: "Invalid page " + message?.action}));
+    } else {
+      var response = await getPledgesPage(page);
+      sendResponse(JSON.stringify({code: response.code, payload: response.body}));
+    }
+
+  } else if (message?.action == "getBuybacksPage") {
+    var page = message?.page;
+    if (!!isNaN(page)) {
+      sendResponse(JSON.stringify({code: 400, error: "Invalid page " + message?.action}));
+    } else {
+      var response = await getBuybacksPage(page);
+      sendResponse(JSON.stringify({code: response.code, payload: response.body}));
+    }
+
+  } else if (message?.action == "getBuybackPage") {
+    var pledgeId = message?.pledgeId;
+    if (!!isNaN(pledgeId)) {
+      sendResponse(JSON.stringify({code: 400, error: "Invalid pledgeId " + message?.action}));
+    } else {
+      var response = await getBuybackPage(pledgeId);
+      sendResponse(JSON.stringify({code: response.code, payload: response.body}));
+    }
+
+  } else if (message?.action == "setAuthToken") {
+    var token = await getRsiToken();
+    if (!token) {
+      sendResponse(JSON.stringify({code: 400, error: "Token not found " + message?.action}));
+    } else {
+      var response = await setAuthToken(token);
+      sendResponse(JSON.stringify({code: response.code, payload: response.body}));
+    }
+
+  } else if (message?.action == "setContextTokenBuyback") {
+    var token = await getRsiToken();
+    if (!token) {
+      sendResponse(JSON.stringify({code: 400, error: "Token not found" + message?.action}));
+    } else {
+      var fromShipId = message?.fromShipId;
+      var toShipId = message?.toShipId;
+      var toSkuId = message?.toSkuId;
+      var pledgeId = message?.pledgeId;
+      if (!!isNaN(fromShipId) || !!isNaN(toShipId) || !!isNaN(toSkuId) || !!isNaN(pledgeId)) {
+        sendResponse(JSON.stringify({code: 400, error: "Token not found" + message?.action}));
+      } else {
+        var response = await setContextTokenBuyback(fromShipId, toShipId, toSkuId, pledgeId, token);
+        sendResponse(JSON.stringify({code: response.code, payload: response.body}));
+      }
+    }
+
+  } else if (message?.action == "setContext") {
+    var token = await getRsiToken();
+    if (!token) {
+      sendResponse(JSON.stringify({code: 400, error: "Token not found" + message?.action}));
+    } else {
+      var response = await setContextToken(token);
+      sendResponse(JSON.stringify({code: response.code, payload: response.body}));
+      
+    }
+
+  } else if (message?.action == "getUpgradePrice") {
+    var token = await getRsiToken();
+    if (!token) {
+      sendResponse(JSON.stringify({code: 400, error: "Token not found " + message?.action}));
+    } else {
+      var fromShipId = message?.fromShipId;
+      var toSkuId = message?.toSkuId; 
+      if (!!isNaN(fromShipId) || !!isNaN(toSkuId)) {
+        sendResponse(JSON.stringify({code: 400, error: "Parameter error " + message?.action}));
+      } else {
+        var response = await getPrices(fromShipId, toSkuId, token);
+        sendResponse(JSON.stringify({code: response.code, payload: response.body}));
+      }
+    }
+
+  } else {
+    sendResponse(JSON.stringify({code: 500, error: "Unknown Action " + message?.action}));
+  }
+}
+
+(chrome || browser).runtime.onMessage.addListener(
+    function(message, sender, sendResponse) {
+      onMessage(message, sendResponse);
+      return true;
+  });

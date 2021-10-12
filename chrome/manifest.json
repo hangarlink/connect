@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Hangar Link Connect",
-  "version": "1.0",
+  "version": "1.1",
   "short_name": "Hangar Link Connect",
   "description": "Hangar Link Connect",
   "homepage_url": "https://hangar.link",
@@ -9,7 +9,6 @@
     "https://robertsspaceindustries.com/*",
     "cookies"
   ],
-  "content_scripts": [],
   "web_accessible_resources": [
   ],
   "icons": { 
@@ -22,6 +21,12 @@
       "scripts/background.js"
     ]
   },
+  "content_scripts": [
+    {
+      "matches": ["https://hangar.link/*"],
+      "js": ["scripts/content.js"]
+    }
+  ],
   "externally_connectable": {
     "matches": [
       "https://hangar.link/*"
