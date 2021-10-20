@@ -124,7 +124,7 @@ async function setContextTokenBuyback(fromShipId, toShipId, toSkuId, pledgeId, t
   return response;
 };
 
-async function setContextToken(fromShipId, toShipId, toSkuId, pledgeId, token) {
+async function setContextToken(token) {
   var payload = {}
   var response = await rsiJSONPost({url: 'https://robertsspaceindustries.com/api/ship-upgrades/setContextToken', payload: payload, rsiToken: token});
   return response;
@@ -136,11 +136,23 @@ async function getPrices(fromShipId, toSkuId, token) {
   return response;
 };
 
+async function reclaimPledge(pledgeId, currentPassword, token) {
+  payload = {"pledge_id": pledgeId, "current_password": currentPassword};
+  var response = await rsiJSONPost({url: 'https://robertsspaceindustries.com/api/account/reclaimPledge', payload: payload, rsiToken: token});
+  return response;
+}
+
+async function addCartItem(skuId, quantity, token) {
+  payload = [{"operationName":"AddCartItemMutation","variables":{"skuId":skuId,"qty":quantity,"identifier":null},"query":"mutation AddCartItemMutation($skuId: ID!, $qty: Int!, $identifier: String) {\n  store(name: \"pledge\") {\n    cart {\n      mutations {\n        add(skuId: $skuId, qty: $qty, identifier: $identifier)\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n"}]
+  var response = await rsiJSONPost({url: 'https://robertsspaceindustries.com/graphql', payload: payload, rsiToken: token});
+  return response;
+};
+
 async function onMessage(rawMessage, sendResponse) {
   var message = JSON.parse(rawMessage || "{}");
 
   if (message?.action == "connect") {
-      sendResponse(JSON.stringify({code: 200, versionMajor: 1, versionMinor: 2}));
+    sendResponse(JSON.stringify({code: 200, versionMajor: 1, versionMinor: 3}));
 
   } else if (message?.action == "identify") {
     var token = await getRsiToken();
@@ -211,7 +223,7 @@ async function onMessage(rawMessage, sendResponse) {
       }
     }
 
-  } else if (message?.action == "setContext") {
+  } else if (message?.action == "setContextToken") {
     var token = await getRsiToken();
     if (!token) {
       sendResponse(JSON.stringify({code: 400, error: "Token not found" + message?.action}));
@@ -232,6 +244,36 @@ async function onMessage(rawMessage, sendResponse) {
         sendResponse(JSON.stringify({code: 400, error: "Parameter error " + message?.action}));
       } else {
         var response = await getPrices(fromShipId, toSkuId, token);
+        sendResponse(JSON.stringify({code: response.code, payload: response.body}));
+      }
+    }
+
+  } else if (message?.action == "reclaimPledge") {
+    var token = await getRsiToken();
+    if (!token) {
+      sendResponse(JSON.stringify({code: 400, error: "Token not found " + message?.action}));
+    } else {
+      var pledgeId = message?.pledgeId;
+      var currentPassword = message?.currentPassword;
+      if ((pledgeId || "") == "" || (currentPassword || "") == "") {
+        sendResponse(JSON.stringify({code: 400, error: "Parameter error " + message?.action}));
+      } else {
+        var response = await reclaimPledge(pledgeId, currentPassword, token);
+        sendResponse(JSON.stringify({code: response.code, payload: response.body}));
+      }
+    }
+
+  } else if (message?.action == "addCartItem") {
+    var token = await getRsiToken();
+    if (!token) {
+      sendResponse(JSON.stringify({code: 400, error: "Token not found " + message?.action}));
+    } else {
+      var skuId = message?.skuId;
+      var quantity = message?.quantity;
+      if ((skuId || "") == "" || (!!isNaN(quantity))) {
+        sendResponse(JSON.stringify({code: 400, error: "Parameter error " + message?.action}));
+      } else {
+        var response = await addCartItem(skuId, quantity, token);
         sendResponse(JSON.stringify({code: response.code, payload: response.body}));
       }
     }
