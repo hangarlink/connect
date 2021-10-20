@@ -5,3 +5,7 @@ v1.0
 v1.1
 ====
 2021/10/12 Aligned code with Chrome Extension.
+
+v1.2
+====
+2021/10/20 Moved from DisplayName to Nickname for handle

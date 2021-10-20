@@ -150,7 +150,7 @@ async function onMessage(rawMessage, sendResponse) {
       var response = await identify(token);
       var payload;
       if (response.code == 200) {
-        payload = {handle: JSON.parse(response.body)?.data?.member?.displayname}
+        payload = {handle: JSON.parse(response.body)?.data?.member?.nickname}
       } else {
         payload = {error: response.body};
       }
