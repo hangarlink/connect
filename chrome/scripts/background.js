@@ -142,7 +142,7 @@ async function onMessage(rawMessage, sendResponse) {
   var message = JSON.parse(rawMessage || "{}");
 
   if (message?.action == "connect") {
-    sendResponse(JSON.stringify({code: 200, versionMajor: 1, versionMinor: 3}));
+    sendResponse(JSON.stringify({code: 200, versionMajor: 1, versionMinor: 7}));
 
   } else if (message?.action == "identify") {
     var token = await getRsiToken();
