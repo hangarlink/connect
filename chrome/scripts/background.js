@@ -16,38 +16,13 @@ function getRsiToken() {
   });
 }
 
-function rsiJSONPost(params) {
-  return new Promise((resolve, reject) => {
-    rsiJSONPostInt(params, function(data) {
-      resolve(data);
-    })
-  }
-)};
-
-function rsiJSONPostInt(params, onComplete) {
+async function rsiJSONPost(params) {
   var url = params.url;
   var payload = params.payload;
   var rsiToken = params.rsiToken;
   var timeout = params.timeout || 10000;
   var rsiUTF8 = !!params.rsiUTF8;
-  var xhr = new XMLHttpRequest();
-  xhr.open("POST", url, true);
-  if (rsiUTF8) {
-    xhr.setRequestHeader("Content-type", 'application/json;charset=UTF-8');
-    xhr.setRequestHeader("Accept", 'application/json;charset=UTF-8');
-  } else {
-    xhr.setRequestHeader("Content-type", 'application/json');
-    xhr.setRequestHeader("Accept", '*/*');
-  }
-  xhr.setRequestHeader("Accept-Language", 'en-GB,en-US;q=0.9,en;q=0.8');
-  xhr.setRequestHeader("X-Rsi-Token", rsiToken);
-  xhr.withCredentials = true;
-  xhr.timeout = timeout;
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState == 4) {
-      onComplete({code: xhr.status, body: xhr.responseText});
-    }
-  }
+ 
   var jsonDataParam;
   if (payload !== null && payload !== undefined) {
     if (typeof payload === 'string') {
@@ -56,34 +31,49 @@ function rsiJSONPostInt(params, onComplete) {
       jsonDataParam = JSON.stringify(payload)
     }
   }
-  xhr.send(jsonDataParam);
+
+  var headers = {
+    "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
+    "X-Rsi-Token": rsiToken,
+    "Content-type": "application/json",
+    "Accept": "*/*"
+  };
+
+  if (rsiUTF8) {
+    headers["Content-type"] = "application/json;charset=UTF-8";
+    headers["Accept"] =  "application/json;charset=UTF-8";
+  }
+
+  var req = {
+    method: "POST",
+    credentials: "include",
+    headers: headers,
+    redirect: "manual",
+    referrerPolicy: "strict-origin-when-cross-origin",
+    body: jsonDataParam
+  }
+  
+  var response = await fetch(url, req);
+  return ({code: response.status, body: await response.text()});
 };
 
-function rsiHTMLGet(params) {
-  return new Promise((resolve, reject) => {
-    rsiHTMLGetInt(params,  function(data) {
-      resolve(data);
-    })
-  }
-)};
-
-function rsiHTMLGetInt(params, onComplete) {
+async function rsiHTMLGet(params) {
   var url = params.url;
   var timeout = params.timeout || 10000;
-  var xhr = new XMLHttpRequest();
-  xhr.open("GET", url, true);
-  xhr.setRequestHeader("accept", 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9');
-  xhr.setRequestHeader("accept-language", 'en-GB,en-US;q=0.9,en;q=0.8');
-  xhr.setRequestHeader("cache-control", 'max-age=0');
-  xhr.withCredentials = true;
-  xhr.timeout = timeout;
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState == 4) {
-      onComplete({code: xhr.status, body: xhr.responseText});
-    }
-  }
-  xhr.send();
+  var headers = {
+    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+    "accept-language": "en-GB,en-US;q=0.9,en;q=0.8",
+    "cache-control": "max-age=0",
+  };
+  var req = {
+    method: "GET",
+    headers: headers,
+    credentials: "include",
+  };
+  var response = await fetch(url, req);
+  return ({code: response.status, body: await response.text()});
 };
+
 
 async function identify(token) {
   var response = await rsiJSONPost({url: 'https://robertsspaceindustries.com/api/spectrum/auth/identify', payload: {}, rsiToken: token});

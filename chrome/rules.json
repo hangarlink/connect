@@ -1,0 +1,17 @@
+[{
+  "id": 1,
+  "priority": 1,
+  "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [{
+          "header": "origin",
+          "operation": "set",
+          "value": "https://robertsspaceindustries.com"
+          }]
+  },
+  "condition": {
+      "urlFilter": "robertsspaceindustries.com",
+      "isUrlFilterCaseSensitive": false,
+      "resourceTypes": ["xmlhttprequest", "websocket"]
+  }
+}]

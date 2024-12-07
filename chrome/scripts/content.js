@@ -15,5 +15,4 @@ window.addEventListener("message", (event) => {
       }
     );
   }
-
 });
